@@ -1,0 +1,25 @@
+{
+  "type": "function",
+  "async": false,
+  "function": {
+    "name": "checkAvailability",
+    "description": "Check open appointment slots at Brightside Dental. Call this before offering any times to the caller. Optionally filter by date (YYYY-MM-DD).",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Requested date in YYYY-MM-DD format. Omit to get the next available slots on any day."
+        },
+        "serviceType": {
+          "type": "string",
+          "description": "Type of service, e.g. 'cleaning', 'checkup', 'general'."
+        }
+      },
+      "required": []
+    }
+  },
+  "server": {
+    "url": "https://YOUR-BACKEND-URL/vapi/tool-calls"
+  }
+}

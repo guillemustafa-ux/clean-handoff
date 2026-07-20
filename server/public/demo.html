@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clean-handoff — Brightside Dental demo</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 640px; margin: 0 auto; padding: 2rem 1rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.4rem; }
+    .badge { font-size: .75rem; opacity: .7; }
+    button {
+      font-size: 1.05rem; padding: .8rem 1.6rem; border-radius: 999px;
+      border: none; cursor: pointer; background: #2563eb; color: #fff;
+    }
+    button:disabled { opacity: .5; cursor: default; }
+    button.active { background: #dc2626; }
+    #status { margin-top: 1rem; font-size: .9rem; opacity: .8; min-height: 1.4em; }
+    #transcript {
+      margin-top: 1.5rem; padding: 1rem; border: 1px solid #8884;
+      border-radius: 8px; min-height: 8rem; max-height: 20rem; overflow-y: auto;
+      font-size: .9rem; white-space: pre-wrap;
+    }
+    .setup-warning {
+      background: #fef3c7; color: #92400e; padding: .8rem 1rem;
+      border-radius: 8px; font-size: .85rem; margin-bottom: 1.5rem;
+    }
+    @media (prefers-color-scheme: dark) {
+      .setup-warning { background: #453a12; color: #fcd34d; }
+    }
+    .tips { font-size: .85rem; opacity: .8; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>Brightside Dental — AI front desk <span class="badge">clean-handoff demo</span></h1>
+  <p>
+    Voice agent for scheduling, new-patient intake and triage.
+    Try booking an appointment — or say <em>"I want to talk to a person"</em> and watch the
+    structured handoff appear on the <a href="/dashboard">dashboard</a>.
+  </p>
+
+  <div id="setup" class="setup-warning" hidden>
+    Missing Vapi keys. Edit <code>demo.html</code> and set <code>VAPI_PUBLIC_KEY</code> and
+    <code>ASSISTANT_ID</code>, or pass them as query params:
+    <code>/demo?pk=...&amp;assistant=...</code>
+  </div>
+
+  <button id="callBtn" disabled>Loading…</button>
+  <div id="status"></div>
+  <div id="transcript" aria-live="polite"></div>
+
+  <p class="tips">
+    Things to try: book a cleaning for tomorrow · say you have severe tooth pain (emergency
+    escalation) · give nonsense answers twice (no-match escalation) · ask for a human directly.
+  </p>
+
+  <script type="module">
+    // ---- Fill these in after creating the assistant in Vapi ----
+    const VAPI_PUBLIC_KEY = "472994d7-b5a9-4864-ba0f-b2e0b5e0546a";   // Vapi dashboard → Account → Public key
+    const ASSISTANT_ID = "ec981f2d-f661-4671-ac93-9aae3e9bdaaa";      // Vapi dashboard → your assistant's ID
+    // ------------------------------------------------------------
+
+    const params = new URLSearchParams(location.search);
+    const publicKey = params.get("pk") || VAPI_PUBLIC_KEY;
+    const assistantId = params.get("assistant") || ASSISTANT_ID;
+
+    const btn = document.getElementById("callBtn");
+    const statusEl = document.getElementById("status");
+    const transcriptEl = document.getElementById("transcript");
+
+    if (!publicKey || !assistantId) {
+      document.getElementById("setup").hidden = false;
+      btn.textContent = "Demo not configured";
+    } else {
+      const { default: Vapi } = await import("https://esm.sh/@vapi-ai/web");
+      const vapi = new Vapi(publicKey);
+      let inCall = false;
+
+      btn.textContent = "📞 Call Brightside Dental";
+      btn.disabled = false;
+
+      btn.addEventListener("click", async () => {
+        if (inCall) { vapi.stop(); return; }
+        btn.disabled = true;
+        statusEl.textContent = "Connecting…";
+        try {
+          await vapi.start(assistantId);
+        } catch (err) {
+          statusEl.textContent = "Failed to start call: " + err.message;
+          btn.disabled = false;
+        }
+      });
+
+      vapi.on("call-start", () => {
+        inCall = true;
+        btn.disabled = false;
+        btn.classList.add("active");
+        btn.textContent = "⏹ End call";
+        statusEl.textContent = "In call — speak into your microphone.";
+        transcriptEl.textContent = "";
+      });
+
+      vapi.on("call-end", () => {
+        inCall = false;
+        btn.classList.remove("active");
+        btn.textContent = "📞 Call Brightside Dental";
+        statusEl.innerHTML =
+          'Call ended. Check the <a href="/dashboard">dashboard</a> for handoffs and call logs.';
+      });
+
+      vapi.on("message", (msg) => {
+        if (msg.type === "transcript" && msg.transcriptType === "final") {
+          transcriptEl.textContent += `${msg.role === "user" ? "You" : "Agent"}: ${msg.transcript}\n`;
+          transcriptEl.scrollTop = transcriptEl.scrollHeight;
+        }
+      });
+
+      vapi.on("error", (err) => {
+        statusEl.textContent = "Error: " + (err?.message || JSON.stringify(err));
+      });
+    }
+  </script>
+</body>
+</html>

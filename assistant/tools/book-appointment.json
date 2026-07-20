@@ -1,0 +1,27 @@
+{
+  "type": "function",
+  "async": false,
+  "function": {
+    "name": "bookAppointment",
+    "description": "Book a confirmed appointment. Only call after confirming name, phone, date, time and reason back to the caller, and only with a slot returned by checkAvailability.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Caller's full name." },
+        "phone": { "type": "string", "description": "Caller's callback phone number." },
+        "date": { "type": "string", "description": "Appointment date, YYYY-MM-DD." },
+        "time": { "type": "string", "description": "Appointment time, HH:MM 24h format (e.g. '14:00')." },
+        "reason": { "type": "string", "description": "Reason for the visit in the caller's words." },
+        "patientType": {
+          "type": "string",
+          "enum": ["new", "existing"],
+          "description": "Whether the caller is a new or existing patient."
+        }
+      },
+      "required": ["name", "phone", "date", "time", "reason"]
+    }
+  },
+  "server": {
+    "url": "https://YOUR-BACKEND-URL/vapi/tool-calls"
+  }
+}

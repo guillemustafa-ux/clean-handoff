@@ -1,0 +1,40 @@
+{
+  "_comment": "Vapi assistant definition. Create via dashboard or POST https://api.vapi.ai/assistant with your private key. Replace YOUR-BACKEND-URL with your ngrok URL (dev) or Render URL (prod). The systemPrompt content lives in system-prompt.md; the tool definitions live in tools/*.json — register them as Custom Tools and attach by toolId, or inline them under model.tools.",
+  "name": "Brightside Dental Front Desk",
+  "firstMessage": "Thanks for calling Brightside Dental, this is the automated front desk. How can I help you today?",
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "temperature": 0.3,
+    "messages": [
+      {
+        "role": "system",
+        "content": "<paste the content of system-prompt.md here>"
+      }
+    ],
+    "tools": [
+      "<inline the five JSON objects from assistant/tools/*.json here, or attach registered tools by toolIds>"
+    ]
+  },
+  "voice": {
+    "provider": "11labs",
+    "voiceId": "burt"
+  },
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-3",
+    "language": "en",
+    "confidenceThreshold": 0.4
+  },
+  "silenceTimeoutSeconds": 20,
+  "maxDurationSeconds": 600,
+  "server": {
+    "url": "https://YOUR-BACKEND-URL/vapi/events"
+  },
+  "serverMessages": ["end-of-call-report", "status-update"],
+  "analysisPlan": {
+    "summaryPlan": {
+      "enabled": true
+    }
+  }
+}

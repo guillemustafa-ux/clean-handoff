@@ -1,0 +1,18 @@
+{
+  "type": "function",
+  "async": false,
+  "function": {
+    "name": "lookupPatient",
+    "description": "Look up an existing patient record by phone number. Use when the caller says they are an existing patient.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "phone": { "type": "string", "description": "Caller's phone number." }
+      },
+      "required": ["phone"]
+    }
+  },
+  "server": {
+    "url": "https://YOUR-BACKEND-URL/vapi/tool-calls"
+  }
+}

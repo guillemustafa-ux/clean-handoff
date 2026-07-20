@@ -1,0 +1,22 @@
+{
+  "type": "function",
+  "async": false,
+  "function": {
+    "name": "createLead",
+    "description": "Create or update a lead/contact record for a caller who is interested but not booking right now, so the clinic can follow up. Confirm name and phone with the caller first.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Caller's full name." },
+        "phone": { "type": "string", "description": "Caller's phone number." },
+        "email": { "type": "string", "description": "Caller's email, if offered." },
+        "intent": { "type": "string", "description": "What the caller is interested in (e.g. 'teeth whitening pricing')." },
+        "notes": { "type": "string", "description": "Any other relevant context for the follow-up call." }
+      },
+      "required": ["name", "phone"]
+    }
+  },
+  "server": {
+    "url": "https://YOUR-BACKEND-URL/vapi/tool-calls"
+  }
+}

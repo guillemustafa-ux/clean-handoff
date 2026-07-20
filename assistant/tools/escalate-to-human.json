@@ -1,0 +1,53 @@
+{
+  "type": "function",
+  "async": false,
+  "function": {
+    "name": "escalateToHuman",
+    "description": "Escalate the call to a human agent with FULL structured context (warm handoff). Call immediately when: the caller asks for a person, the same question fails twice, the caller is frustrated, it is a dental emergency, or the request is out of scope. Fill every parameter you have information for — the human must not need to ask the caller to repeat anything.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "callerName": { "type": "string", "description": "Caller's name, if collected. Empty string if unknown." },
+        "callerPhone": { "type": "string", "description": "Caller's phone number, if collected." },
+        "existingPatient": { "type": "boolean", "description": "Whether the caller is an existing patient, if known." },
+        "intent": {
+          "type": "string",
+          "enum": ["booking", "qualification", "emergency", "other"],
+          "description": "What the caller was trying to do."
+        },
+        "escalationReason": {
+          "type": "string",
+          "enum": ["explicit_request", "repeated_no_match", "negative_sentiment", "out_of_domain", "emergency"],
+          "description": "Why the call is being escalated."
+        },
+        "urgency": {
+          "type": "string",
+          "enum": ["normal", "high", "emergency"],
+          "description": "How urgently a human must call back."
+        },
+        "reasonForVisit": { "type": "string", "description": "Reason for visit collected so far, even partial." },
+        "preferredDate": { "type": "string", "description": "Preferred date collected so far, if any." },
+        "insurance": { "type": "string", "description": "Insurance info collected so far, if any." },
+        "noMatchCount": { "type": "number", "description": "How many failed understanding attempts occurred. 0 if none." },
+        "questionsAsked": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "The questions you asked the caller during this call."
+        },
+        "transcriptSummary": {
+          "type": "string",
+          "description": "1-3 sentence summary of the call written FOR THE HUMAN AGENT: what the caller wanted, what was collected, what went wrong."
+        },
+        "sentiment": {
+          "type": "string",
+          "enum": ["neutral", "frustrated", "positive"],
+          "description": "The caller's mood."
+        }
+      },
+      "required": ["escalationReason", "intent", "urgency", "transcriptSummary", "sentiment"]
+    }
+  },
+  "server": {
+    "url": "https://YOUR-BACKEND-URL/vapi/tool-calls"
+  }
+}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clean-handoff — Front desk dashboard</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 960px; margin: 0 auto; padding: 2rem 1rem; line-height: 1.45;
+    }
+    h1 { font-size: 1.3rem; }
+    h2 { font-size: 1.05rem; margin-top: 2rem; }
+    .card {
+      border: 1px solid #8884; border-radius: 10px; padding: 1rem 1.2rem; margin: .8rem 0;
+    }
+    .card.emergency { border-color: #dc2626; }
+    .card.high { border-color: #d97706; }
+    .row { display: flex; flex-wrap: wrap; gap: .4rem .8rem; margin: .3rem 0; }
+    .tag {
+      font-size: .72rem; padding: .15rem .55rem; border-radius: 999px;
+      background: #8882; text-transform: uppercase; letter-spacing: .03em;
+    }
+    .tag.reason { background: #2563eb22; }
+    .tag.urgency-emergency { background: #dc262633; }
+    .tag.urgency-high { background: #d9770633; }
+    .tag.sentiment-frustrated { background: #dc262622; }
+    dl { display: grid; grid-template-columns: max-content 1fr; gap: .2rem .8rem; font-size: .88rem; margin: .6rem 0 0; }
+    dt { opacity: .6; }
+    dd { margin: 0; }
+    .summary { font-style: italic; margin-top: .5rem; font-size: .92rem; }
+    .empty { opacity: .6; font-size: .9rem; }
+    table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+    th, td { text-align: left; padding: .4rem .6rem; border-bottom: 1px solid #8883; }
+    a { color: #2563eb; }
+    .meta { font-size: .78rem; opacity: .6; }
+  </style>
+</head>
+<body>
+  <h1>Front desk dashboard <span class="meta">— what a human agent sees at handoff</span></h1>
+  <p class="meta">
+    Auto-refreshes every 5s. Make a call from the <a href="/demo">demo page</a> and trigger an
+    escalation to see a structured handoff appear here.
+  </p>
+
+  <h2>Escalated calls (structured handoffs)</h2>
+  <div id="handoffs"><p class="empty">No handoffs yet.</p></div>
+
+  <h2>Call log (post-call webhook write-back)</h2>
+  <div id="calls"><p class="empty">No calls logged yet.</p></div>
+
+  <script>
+    const esc = (s) => String(s ?? "—").replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    async function refresh() {
+      try {
+        const [handoffs, calls] = await Promise.all([
+          fetch("/handoffs").then((r) => r.json()),
+          fetch("/calls").then((r) => r.json())
+        ]);
+
+        const hEl = document.getElementById("handoffs");
+        if (handoffs.length === 0) {
+          hEl.innerHTML = '<p class="empty">No handoffs yet.</p>';
+        } else {
+          hEl.innerHTML = handoffs.map((h) => `
+            <div class="card ${esc(h.urgency)}">
+              <div class="row">
+                <span class="tag reason">${esc(h.escalationReason)}</span>
+                <span class="tag urgency-${esc(h.urgency)}">urgency: ${esc(h.urgency)}</span>
+                <span class="tag">intent: ${esc(h.intent)}</span>
+                <span class="tag sentiment-${esc(h.sentiment)}">sentiment: ${esc(h.sentiment)}</span>
+              </div>
+              <dl>
+                <dt>Caller</dt><dd>${esc(h.caller?.name)} · ${esc(h.caller?.phone)} · ${h.caller?.existingPatient ? "existing patient" : "new/unknown"}</dd>
+                <dt>Reason for visit</dt><dd>${esc(h.dataCollectedSoFar?.reasonForVisit)}</dd>
+                <dt>Preferred date</dt><dd>${esc(h.dataCollectedSoFar?.preferredDate)}</dd>
+                <dt>Insurance</dt><dd>${esc(h.dataCollectedSoFar?.insurance)}</dd>
+                <dt>No-match retries</dt><dd>${esc(h.attempts?.noMatchCount)}</dd>
+              </dl>
+              <p class="summary">"${esc(h.transcriptSummary)}"</p>
+              <p class="meta">${esc(h.timestamp)} · call ${esc(h.callId)} · ${esc(h.id)}</p>
+            </div>`).join("");
+        }
+
+        const cEl = document.getElementById("calls");
+        if (calls.length === 0) {
+          cEl.innerHTML = '<p class="empty">No calls logged yet.</p>';
+        } else {
+          cEl.innerHTML = `<table>
+            <tr><th>Call ID</th><th>Ended</th><th>Outcome</th><th>Escalated</th><th>Summary</th></tr>
+            ${calls.map((c) => `
+              <tr>
+                <td>${esc(c.callId)}</td>
+                <td>${esc(c.endedAt)}</td>
+                <td>${esc(c.outcome)}</td>
+                <td>${c.escalated ? "yes" : "no"}</td>
+                <td>${esc(c.summary)}</td>
+              </tr>`).join("")}
+          </table>`;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>
