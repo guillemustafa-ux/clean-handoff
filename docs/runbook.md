@@ -39,7 +39,7 @@ Run in order; stop at the first failing step.
 
 | # | Check | How | Healthy result |
 |---|---|---|---|
-| 1 | Backend up | `GET https://<backend-url>/health` | `{"ok":true,...}` (on Render free tier, first hit after idle takes ~30-60s — that's cold start, not an outage) |
+| 1 | Backend up | `GET https://<backend-url>/health` | `{"ok":true,...}` |
 | 2 | Backend logs | Render dashboard → service → Logs (or local terminal) | `[tool:*]` and `[event:*]` lines on recent calls |
 | 3 | Recent handoffs/calls | `GET /handoffs`, `GET /calls` | JSON arrays with recent records |
 | 4 | Vapi side | Vapi dashboard → Call Logs → open the failing call by `callId` | Tool calls show request + response; errors show HTTP status from our backend |
@@ -91,8 +91,6 @@ In-call escalation (AI → human) is not an incident — it's the designed behav
 - **Handoff field values are LLM-populated.** `transcriptSummary`, `sentiment` and
   `dataCollectedSoFar` are filled by the model from conversation context — the JSON schema
   marks the critical ones as required, and the backend re-validates.
-- **Render free tier cold start:** ~30-60s wake-up after 15 min idle. Documented on the demo
-  page; not a defect.
 - **Web-only demo:** no PSTN number attached (cost decision). The webhook architecture is
   identical with a Twilio number attached in Vapi; nothing in this backend changes.
 

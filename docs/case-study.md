@@ -2,8 +2,9 @@
 
 > Reusable copy for Upwork. Three formats below: full case study (repo/README/interviews),
 > cover-letter block (paste into proposals, target ~1000-1500 chars, hard limit 5000),
-> and portfolio item (title ≤70 chars, description ≤600 chars). Replace `[DEMO-URL]`
-> with the live Render URL after deploy.
+> and portfolio item (title ≤70 chars, description ≤600 chars).
+>
+> Live demo: https://clean-handoff.onrender.com/demo
 
 ---
 
@@ -67,12 +68,11 @@ without asking the caller to repeat anything, and a live dashboard shows every
 handoff. The repo includes the call-flow diagram, an operational runbook, and
 full setup docs.
 
-Live demo (browser mic, no phone needed): [DEMO-URL]
+Live demo (browser mic, no phone needed): https://clean-handoff.onrender.com/demo
 ```
 
-Character count: **1.149** (con el placeholder `[DEMO-URL]` incluido; la URL real de Render
-suma ~30 más) — dentro de la meta de 1000-1500 y lejos del tope de 5000. Ojo: repo + demo
-son 2 links — el máximo permitido por propuesta.
+Character count: **1.178** — dentro de la meta de 1000-1500 y lejos del tope de 5000.
+Ojo: repo + demo son 2 links — el máximo permitido por propuesta.
 
 ---
 

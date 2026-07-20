@@ -8,9 +8,9 @@ transfer cold — the caller repeats everything — or dump a raw transcript nob
 Dental") built on **Vapi** + **Node.js/TypeScript**, designed around one idea: when the AI
 escalates, the human receives a **structured context payload**, not free-form notes.
 
-> 🎙 **Live demo:** `[DEMO-URL]/demo` — browser mic call, no phone number needed
-> 📋 **Front-desk dashboard:** `[DEMO-URL]/dashboard` — see structured handoffs land in real time
-> *(Free-tier hosting: first load after idle takes ~30-60s to wake up. That's a cold start, not a broken link.)*
+> 🎙 **Live demo:** [clean-handoff.onrender.com/demo](https://clean-handoff.onrender.com/demo) — browser mic call, no phone number needed
+> 📋 **Front-desk dashboard:** [clean-handoff.onrender.com/dashboard](https://clean-handoff.onrender.com/dashboard) — see structured handoffs land in real time
+> *(Hosted on Render Starter — always on, no cold starts.)*
 
 ## What it demonstrates
 
@@ -124,14 +124,17 @@ curl -X POST http://localhost:3000/vapi/events \
   -d '{"message":{"type":"end-of-call-report","call":{"id":"test_1"},"endedReason":"assistant-ended-call","analysis":{"summary":"Booking call, escalated on request."}}}'
 ```
 
-## Deploy (Render free tier)
+## Deploy (Render)
 
 1. Push this repo to GitHub, create a Render **Web Service** on it:
    root directory `server`, build `npm install && npm run build`, start `npm start`.
+   (Deployed here on the **Starter** instance — Render's free tier caps how many free
+   instances an account can run per month and this account had already used its quota;
+   Starter also avoids the free tier's cold-start spin-down, which matters for a portfolio
+   link a reviewer might click cold.)
 2. Env vars: `VAPI_SERVER_SECRET` (same value as the Vapi credential).
-3. Update every tool's `server.url` and the assistant's server URL in Vapi from the ngrok URL
-   to `https://<your-app>.onrender.com`.
-4. Replace `[DEMO-URL]` in this README with the Render URL.
+3. Update every tool's `server.url` and the assistant's server URL in Vapi from the ngrok/tunnel
+   URL to `https://<your-app>.onrender.com`.
 
 ## Known limitations (deliberate)
 
@@ -139,7 +142,6 @@ curl -X POST http://localhost:3000/vapi/events \
 - **Prompt-enforced retry counting** — Vapi has no native no-match counter; the 2-retry rule
   lives in the system prompt, and the backend compensates by validating handoff payloads.
   Documented in the [runbook](docs/runbook.md#7-known-limitations-deliberate-documented).
-- **Free-tier cold starts** — ~30-60s wake-up after idle.
 - **lowdb JSON store** — right-sized for a demo; swap for a real DB/CRM API in production.
 
 ## License
